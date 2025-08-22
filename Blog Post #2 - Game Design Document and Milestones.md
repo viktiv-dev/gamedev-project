@@ -2,7 +2,7 @@
 
 ## Executive Summary
 
-**1. Working Title**: Blank
+**1. Working Title**: Your Path
 
 **2. Game Concept**: A fast paced platformer with focus on avoiding enemies.
 
