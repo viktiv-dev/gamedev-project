@@ -15,7 +15,6 @@ public class AimArrow : MonoBehaviour
     public bool hideWhenIdle = true;               
     public float detectionAngle = 15f;             
     public float detectionRange = 10f;            
-
     private Vector2 lastDir = Vector2.right;       
     private SpriteRenderer[] renderers;
     private AnchorPoint[] anchors;

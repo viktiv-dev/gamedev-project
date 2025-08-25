@@ -19,4 +19,6 @@ public class AnchorPoint : MonoBehaviour
     {
         return sr.color == Color.green;
     }
+    
+
 }
