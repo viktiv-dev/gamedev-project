@@ -24,7 +24,10 @@ public class AnchorHook : MonoBehaviour
     private bool hookActive = false;
     private bool hookConnected = false;
     private Vector3 hookPosition;
-
+    
+    public AudioSource hookAudioSource;
+    public AudioClip hookSound;
+    
     void OnEnable()
     {
         hookAction?.action.Enable();
@@ -124,6 +127,8 @@ public class AnchorHook : MonoBehaviour
         hookPosition = player.position;
         hookLine.enabled = true;
         hookLine.positionCount = 2;
+        hookAudioSource.PlayOneShot(hookSound);
+        GameTimer.Instance.AddTime(1f);
     }
 
     void ResetHook()

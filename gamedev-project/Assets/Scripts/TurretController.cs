@@ -13,7 +13,9 @@ public class TurretController : MonoBehaviour
 
     public float fireInterval = 3f;
     public float chargeTime = 0.6f;
-    public float detectionRange = 20f; // small detection range
+    public float detectionRange = 20f;
+    public float detectionAngle = 90f;
+    public LayerMask obstacleMask; 
     public float lineRange = 100f;     // very long laser
     public float angleOffset = 0f;
     public bool useChargeWarning = true;
@@ -29,12 +31,20 @@ public class TurretController : MonoBehaviour
     public float fireWidth = 0.08f;
     public float finalVisibleTime = 1f;
     public float finalDelay = 0.2f; // small delay before final shot
+    public float minAngle = -90f; // lowest rotation angle in degrees
+    public float maxAngle = 90f;  // highest rotation angle in degrees
+
 
     public bool invertDirection = true;
+    
+    public float timePenalty = 2f;
 
-    float cooldown;
-    bool isFiring;
-
+    private float cooldown;
+    private bool isFiring;
+    
+    public AudioSource audioSource;
+    public AudioClip laserSound;
+    public AudioClip warningSound;
     void Start()
     {
         cooldown = Random.Range(0f, fireInterval * 0.5f);
@@ -47,23 +57,37 @@ public class TurretController : MonoBehaviour
     void Update()
     {
         Vector2 toPlayer = player.position - gunPivot.position;
+        Vector2 turretDir = gunPivot.right; 
+        if (invertDirection) turretDir = -turretDir;
 
-        if (toPlayer.magnitude <= detectionRange)
+        float angleToPlayer = Vector2.Angle(turretDir, toPlayer);
+
+        if (angleToPlayer <= detectionAngle / 2f && toPlayer.magnitude <= detectionRange)
         {
-            float targetAngle = Mathf.Atan2(toPlayer.y, toPlayer.x) * Mathf.Rad2Deg + angleOffset;
-            Quaternion targetRot = Quaternion.Euler(0f, 0f, targetAngle);
+            // Cast a ray toward the player to check line-of-sight
+            RaycastHit2D hit = Physics2D.Raycast(gunPivot.position, toPlayer.normalized, detectionRange, obstacleMask | (1 << player.gameObject.layer));
 
-            if (rotateContinuously || !isFiring)
-                gunPivot.rotation = Quaternion.RotateTowards(gunPivot.rotation, targetRot, rotationSpeed * Time.deltaTime);
-
-            cooldown -= Time.deltaTime;
-            if (cooldown <= 0f && !isFiring)
+            if (hit.collider != null && hit.collider.gameObject == player.gameObject)
             {
-                StartCoroutine(FireRoutine());
-                cooldown = fireInterval;
+                // Player is visible and detected
+                float targetAngle = Mathf.Atan2(toPlayer.y, toPlayer.x) * Mathf.Rad2Deg + angleOffset;
+                targetAngle = Mathf.Clamp(targetAngle, minAngle, maxAngle);
+                Quaternion targetRot = Quaternion.Euler(0f, 0f, targetAngle);
+
+                if (rotateContinuously || !isFiring)
+                    gunPivot.rotation = Quaternion.RotateTowards(gunPivot.rotation, targetRot, rotationSpeed * Time.deltaTime);
+
+                cooldown -= Time.deltaTime;
+                if (cooldown <= 0f && !isFiring)
+                {
+                    StartCoroutine(FireRoutine());
+                    cooldown = fireInterval;
+                }
             }
         }
     }
+
+
 
     IEnumerator FireRoutine()
     {
@@ -80,6 +104,7 @@ public class TurretController : MonoBehaviour
                 Vector3 end = start + new Vector3(dir.x, dir.y, 0f) * lineRange;
 
                 warningLine.gameObject.SetActive(true);
+                audioSource.PlayOneShot(warningSound);
                 warningLine.startWidth = warningWidth;
                 warningLine.endWidth = warningWidth;
                 warningLine.startColor = warningColor;
@@ -112,30 +137,34 @@ public class TurretController : MonoBehaviour
         bool prevRotate = rotateContinuously;
         rotateContinuously = false;
 
-        // --- Final warning visible ---
-        Vector2 finalDir = GetMuzzleDirection();
-        Vector3 finalStart = gunPivot.position;
-        Vector3 finalEnd = finalStart + new Vector3(finalDir.x, finalDir.y, 0f) * lineRange;
-        warningLine.gameObject.SetActive(true);
-        warningLine.SetPosition(0, finalStart);
-        warningLine.SetPosition(1, finalEnd);
-
         // --- Small final delay ---
         yield return new WaitForSeconds(finalDelay);
 
-        // --- Blink warning -> fire ---
-        RaycastHit2D hit = Physics2D.Raycast(finalStart, finalDir, detectionRange, hitMask);
-        if (hit.collider != null) finalEnd = hit.point;
+// --- Fire infinite laser ---
+        Vector2 finalDir = GetMuzzleDirection();
+        Vector3 finalStart = gunPivot.position;
+        Vector3 finalEnd = finalStart + new Vector3(finalDir.x, finalDir.y, 0f) * lineRange;
 
         fireLine.gameObject.SetActive(true);
+        audioSource.PlayOneShot(laserSound);
         fireLine.SetPosition(0, finalStart);
         fireLine.SetPosition(1, finalEnd);
 
-        // quick blink: hide warning for a frame
+// Check if player is hit anywhere along the line
+        RaycastHit2D[] hits = Physics2D.RaycastAll(finalStart, finalDir, lineRange);
+        foreach (var h in hits)
+        {
+            if (h.collider != null && h.collider.CompareTag("Player"))
+            {
+                GameTimer.Instance.RemoveTime(timePenalty);
+                Debug.Log("Player hit by infinite laser! -" + timePenalty + "s");
+                break;
+            }
+        }
+        
         warningLine.gameObject.SetActive(false);
         yield return null;
-
-        // show fire for the full duration
+        
         float elapsed = 0f;
         while (elapsed < finalVisibleTime)
         {
@@ -146,6 +175,7 @@ public class TurretController : MonoBehaviour
         }
 
         fireLine.gameObject.SetActive(false);
+
         warningLine.gameObject.SetActive(false);
 
         rotateContinuously = prevRotate;

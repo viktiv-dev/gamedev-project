@@ -346,15 +346,19 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   gunPivot: {fileID: 3299165461563883016}
   gunSprite: {fileID: 3191036401463463372}
-  player: {fileID: 0}
+  player: {fileID: 1127026111992557368}
   warningLine: {fileID: 6405963936578232580}
   fireLine: {fileID: 2161439531882912204}
   hitMask:
     serializedVersion: 2
-    m_Bits: 0
+    m_Bits: 8
   fireInterval: 3
   chargeTime: 0.6
-  detectionRange: 20
+  detectionRange: 35
+  detectionAngle: 360
+  obstacleMask:
+    serializedVersion: 2
+    m_Bits: 64
   lineRange: 100
   angleOffset: 180
   useChargeWarning: 1
@@ -367,7 +371,10 @@ MonoBehaviour:
   fireWidth: 0.2
   finalVisibleTime: 0.4
   finalDelay: 0.2
+  minAngle: 180
+  maxAngle: 360
   invertDirection: 1
+  timePenalty: 2
 --- !u!1 &8635586235898617014
 GameObject:
   m_ObjectHideFlags: 0
