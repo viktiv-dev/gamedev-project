@@ -6,7 +6,7 @@ This game development course project is a platformer focused on fast paced movem
 ## Blog Posts
 * [Roll-a-Ball – Covers the initial prototype based on Unity’s Roll-a-Ball tutorial and added modifications.](https://github.com/viktiv-dev/gamedev-project/blob/main/Blog%20Post%20%231%20-%20Roll-a-Ball.md)
 * [Game Design Document & Milestones – Outlines the core gameplay, mechanics, worldbuilding, and project goals.](https://github.com/viktiv-dev/gamedev-project/blob/main/Blog%20Post%20%232%20-%20Game%20Design%20Document%20and%20Milestones.md)
-* [Development Update #1 – Progress on grappling hook mechanic.](Blog Post #3 - Grappling Hook Update.md)](https://github.com/viktiv-dev/gamedev-project/blob/main/Blog%20Post%20%233%20-%20Grappling%20Hook%20Update.md)
+* [Development Update #1 – Progress on grappling hook mechanic.](https://github.com/viktiv-dev/gamedev-project/blob/main/Blog%20Post%20%233%20-%20Grappling%20Hook%20Update.md)
 * [Development Update #2 – Progress on enemies nad projectiles development.](https://github.com/viktiv-dev/gamedev-project/blob/main/Blog%20Post%20%234%20-%20Enemies%20Update.md)
 * [Development Update #3 – Progress on level design and collectables.](https://github.com/viktiv-dev/gamedev-project/blob/main/Blog%20Post%20%235%20-%20Level%20Design.md)
 * [Final Game & Conclusion – Showcases the finished game, reflecting on development and final improvements.](https://github.com/viktiv-dev/gamedev-project/blob/main/Blog%20Post%20%236%20-%20Finalizing%20Project.md)
