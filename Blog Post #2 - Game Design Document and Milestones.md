@@ -8,7 +8,7 @@
 
 **3. Genres**: Platformer
 
-**4. Target Audience**: TBD
+**4. Target Audience**: Youth
 
 **5. Unique Selling Points**: Satisfying grappling hook mechanic. Fast paced movement.
 
@@ -31,9 +31,8 @@
 **1. World-building**: 
 
 - **World**: The world is an abstract version of Earth in the future.
-- **Story**: TBD
-- **Characters**: Nameless main character that is unable to move through his body. 
-- **Level Design**: TBD
+- **Characters**: Nameless main character.
+- **Level Design**: 3 levels with one of them including a tutorial.
 
 # 3 Milestones #
 
