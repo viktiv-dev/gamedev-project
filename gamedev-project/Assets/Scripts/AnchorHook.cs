@@ -7,26 +7,36 @@ public class AnchorHook : MonoBehaviour
     [Header("References")]
     public Transform player;
     public Rigidbody2D playerRb;
-    public InputActionReference hookAction;   
+    public InputActionReference hookAction;
     public InputActionReference cancelAction;
-    public AimArrow aimArrow;         
-    public CameraControler cameraController; // Reference to your camera script
+    public AimArrow aimArrow;
+    public CameraControler cameraController;
+    public BackgroundColorController bgColorController;
 
     [Header("Settings")]
     public LineRenderer hookLine;
-    public float hookSpeed = 20f;      
+    public float hookSpeed = 20f;
     public float pullForce = 5f;
     public float pullExponent = 1.5f;
-    public float snapDistance = 0.2f;
-    public float hookDelay = 0.2f; 
+    public float hookDelay = 0.2f;
+    private AnchorPoint lastHookedAnchor = null;
+
+    [Header("Pull tuning")]
+    public float maxPullSpeed = 25f;      
+    public float pullLerp = 20f;            
+    public float cancelCarrySpeed = 2f;     
+    public float cancelDampDuration = 0.12f;
+
+    [Header("Audio")]
+    public AudioSource hookAudioSource;
+    public AudioClip hookSound;
 
     private AnchorPoint targetAnchor;
     private bool hookActive = false;
     private bool hookConnected = false;
     private Vector3 hookPosition;
-    
-    public AudioSource hookAudioSource;
-    public AudioClip hookSound;
+    private Coroutine pullCoroutine = null;
+    private bool cancelled = false;
     
     void OnEnable()
     {
@@ -51,16 +61,12 @@ public class AnchorHook : MonoBehaviour
             if (hookActive)
             {
                 if (newAnchor != null && newAnchor != targetAnchor)
-                {
                     StartHook(newAnchor);
-                }
             }
             else
             {
                 if (newAnchor != null)
-                {
                     StartHook(newAnchor);
-                }
             }
         }
 
@@ -78,70 +84,105 @@ public class AnchorHook : MonoBehaviour
                 {
                     hookConnected = true;
                     hookPosition = targetAnchor.transform.position;
-
-                    // Notify camera to focus on hook
                     cameraController?.SetHookTarget(targetAnchor.transform.position, true);
+                    aimArrow?.SetIgnoredAnchor(targetAnchor);
+                    if (pullCoroutine != null) StopCoroutine(pullCoroutine);
+                    cancelled = false;
+                    pullCoroutine = StartCoroutine(PullRoutine(targetAnchor));
 
-                    if (aimArrow != null)
-                        aimArrow.SetIgnoredAnchor(targetAnchor);
+                    // 🔥 NEW: trigger destruction if this is a destroyable anchor
+                    DestroyAnchorPoint destroyable = targetAnchor.GetComponent<DestroyAnchorPoint>();
+                    if (destroyable != null)
+                    {
+                        destroyable.StartDestroyCountdown();
+                    }
                 }
-            }
-            else
-            {
-                StartCoroutine(DelayHook(hookDelay, targetAnchor));
-            }
 
+            }
             hookLine.SetPosition(0, player.position);
             hookLine.SetPosition(1, hookPosition);
         }
     }
 
-    IEnumerator DelayHook(float delayTime, AnchorPoint targetAnchor)
+    IEnumerator PullRoutine(AnchorPoint anchor)
     {
-        yield return new WaitForSeconds(delayTime);
-        MovePlayerToAnchor(targetAnchor);
-    }
-
-    void MovePlayerToAnchor(AnchorPoint anchor)
-    {
-        Vector2 toAnchor = (anchor.transform.position - player.position);
-        float distance = toAnchor.magnitude;
-
-        if (distance > snapDistance)
+        float t = 0f;
+        while (t < hookDelay)
         {
-            float force = pullForce * Mathf.Pow(distance, pullExponent);
-            playerRb.linearVelocity = toAnchor.normalized * force;
+            if (cancelled) { pullCoroutine = null; yield break; }
+            t += Time.deltaTime;
+            yield return null;
         }
-        else
+        
+        while (!cancelled)
         {
-            player.position = anchor.transform.position;
-            playerRb.linearVelocity = Vector2.zero;
+            if (anchor == null) break;
+            Vector2 toAnchor = (anchor.transform.position - player.position);
+            float desiredSpeed = pullForce * Mathf.Pow(toAnchor.magnitude, pullExponent);
+            desiredSpeed = Mathf.Min(desiredSpeed, maxPullSpeed);
+            Vector2 desiredVel = toAnchor.normalized * desiredSpeed;
+            float alpha = 1f - Mathf.Exp(-pullLerp * Time.fixedDeltaTime);
+            playerRb.linearVelocity = Vector2.Lerp(playerRb.linearVelocity, desiredVel, alpha);
+            yield return new WaitForFixedUpdate();
         }
+
+
+        pullCoroutine = null;
     }
 
     void StartHook(AnchorPoint newAnchor)
     {
+        if (pullCoroutine != null) { cancelled = true; StopCoroutine(pullCoroutine); pullCoroutine = null; }
         targetAnchor = newAnchor;
         hookActive = true;
         hookConnected = false;
         hookPosition = player.position;
         hookLine.enabled = true;
-        hookLine.positionCount = 2;
+        hookLine.positionCount = 2; 
         hookAudioSource.PlayOneShot(hookSound);
-        GameTimer.Instance.AddTime(1f);
+        if (GameTimer.Instance != null ) 
+            GameTimer.Instance.AddTime(1f);
+        bgColorController?.TriggerHookColor();
     }
 
-    void ResetHook()
+    public bool GetHookConnected()
     {
+        return hookConnected;
+    }
+
+    public void ResetHook()
+    {
+        cancelled = true;
+        if (pullCoroutine != null) { StopCoroutine(pullCoroutine); pullCoroutine = null; }
         hookActive = false;
         hookConnected = false;
         hookLine.enabled = false;
-
-        // Stop camera focus on hook
         cameraController?.SetHookTarget(Vector3.zero, false);
-
         targetAnchor = null;
-        playerRb.linearVelocity = playerRb.linearVelocity.normalized * (pullForce * 0.5f);
         aimArrow?.ClearIgnoredAnchor();
+        float currentSpeed = playerRb.linearVelocity.magnitude;
+        float targetSpeed = Mathf.Min(currentSpeed, cancelCarrySpeed);
+        StartCoroutine(DampVelocityTo(targetSpeed, cancelDampDuration));
+    }
+
+
+    IEnumerator DampVelocityTo(float targetSpeed, float duration)
+    {
+        float elapsed = 0f;
+        Vector2 initialVel = playerRb.linearVelocity;
+        if (initialVel.sqrMagnitude < 0.0001f)
+        {
+            playerRb.linearVelocity = Vector2.zero;
+            yield break;
+        }
+        while (elapsed < duration)
+        {
+            elapsed += Time.deltaTime;
+            float alpha = Mathf.Clamp01(elapsed / duration);
+            float mag = Mathf.Lerp(initialVel.magnitude, targetSpeed, alpha);
+            playerRb.linearVelocity = (initialVel.normalized) * mag;
+            yield return null;
+        }
+        playerRb.linearVelocity = (initialVel.normalized) * targetSpeed;
     }
 }

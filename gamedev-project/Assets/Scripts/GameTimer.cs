@@ -12,14 +12,14 @@ public class GameTimer : MonoBehaviour
     public event Action OnGameOver;
 
     [Header("Audio")]
-    public AudioSource audioSource;          // single audio source to play beeps and damage
+    public AudioSource audioSource;        
     public AudioClip timeAddedClip;
     public AudioClip timeRemovedClip;
-    public float pitchIncrease = 0.2f;       // how much pitch increases for fast additions
+    public float pitchIncrease = 0.2f;      
     public float fastThreshold = 3f;  
     public float pitchThreshold = 2;
 
-    private float lastTimeAdded = -10f;      // track last time a time bonus occurred
+    private float lastTimeAdded = -10f;      
     private bool gameOverTriggered = false;
 
     void Awake()
@@ -48,8 +48,6 @@ public class GameTimer : MonoBehaviour
 
         float currentTime = Time.time;
         timeLeft += amount;
-
-        // Handle fast-add pitch
         if (audioSource != null && timeAddedClip != null)
         {
             float pitch = audioSource.pitch;
@@ -76,7 +74,7 @@ public class GameTimer : MonoBehaviour
 
         if (audioSource != null && timeRemovedClip != null)
         {
-            audioSource.pitch = 1f; // reset pitch
+            audioSource.pitch = 1f; 
             audioSource.PlayOneShot(timeRemovedClip);
         }
 
@@ -94,6 +92,5 @@ public class GameTimer : MonoBehaviour
         gameOverTriggered = true;
         OnGameOver?.Invoke();
         Debug.Log("Game Over!");
-        // You can also call a GameManager method here to show Game Over UI
     }
 }

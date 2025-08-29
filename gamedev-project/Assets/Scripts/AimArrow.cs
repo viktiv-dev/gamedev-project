@@ -10,14 +10,15 @@ public class AimArrow : MonoBehaviour
 
     [Header("Settings")]
     public float radius = 1.5f;    
-    private AnchorPoint ignoredAnchor;                
     public float deadZone = 0.2f;                  
     public bool hideWhenIdle = true;               
     public float detectionAngle = 15f;             
-    public float detectionRange = 10f;            
+    public float detectionRange = 10f; 
+    
     private Vector2 lastDir = Vector2.right;       
     private SpriteRenderer[] renderers;
     private AnchorPoint[] anchors;
+    private AnchorPoint ignoredAnchor;  
 
     void Awake()
     {
@@ -27,18 +28,16 @@ public class AimArrow : MonoBehaviour
 
     void OnEnable()
     {
-        if (aimAction != null) aimAction.action.Enable();
+       aimAction.action.Enable();
     }
 
     void OnDisable()
     {
-        if (aimAction != null) aimAction.action.Disable();
+        aimAction.action.Disable();
     }
 
     void Update()
     {
-        if (player == null) return;
-
         Vector2 input = aimAction != null ? aimAction.action.ReadValue<Vector2>() : Vector2.zero;
 
         Vector2 dir;
@@ -72,15 +71,12 @@ public class AimArrow : MonoBehaviour
         Vector3 arrowTip = player.position + (Vector3)(dir * radius); 
         foreach (var anchor in anchors)
         {
-            if (anchor == null || anchor == ignoredAnchor) continue;
+            if (anchor == ignoredAnchor) continue;
 
             Vector2 toAnchor = (anchor.transform.position - arrowTip);
             float distance = toAnchor.magnitude;
-
             if (distance > detectionRange) continue; 
-
             float angle = Vector2.Angle(dir, (anchor.transform.position - player.position));
-
             if (angle <= detectionAngle && distance < closestDist)
             {
                 closest = anchor;
@@ -92,7 +88,10 @@ public class AimArrow : MonoBehaviour
             anchor.SetHighlight(false);
             
         if (closest != null)
-            closest.SetHighlight(true);
+        {
+            if (closest.gameObject != null) 
+                closest.SetHighlight(true);
+        }
     }
 
     public AnchorPoint GetHighlightedAnchor()

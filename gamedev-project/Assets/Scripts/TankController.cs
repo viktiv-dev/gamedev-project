@@ -3,25 +3,22 @@ using System.Collections;
 public class TankController : MonoBehaviour
 {
     [Header("References")]
-    public Transform muzzlePoint;  // where bullets spawn (if null, spawn at transform.position)
+    public Transform muzzlePoint;  
     public GameObject bulletPrefab; 
-    public LayerMask bulletHitMask; // assign same layer mask as bullet's hitMask (or player layer)
+    public LayerMask bulletHitMask; 
 
     [Header("Burst")]
     public int burstCount = 3;
-    public float burstInterval = 0.18f;   // time between bullets in a burst
-    public float burstCooldown = 2.5f;    // time between bursts
-
+    public float burstInterval = 0.18f;   
+    public float burstCooldown = 2.5f;   
     [Header("Bullet")]
     public float bulletSpeed = 12f;
     public float bulletLife = 4f;
-    public float fireJitterDegrees = 0f; // spread per bullet
-
+    public float fireJitterDegrees = 0f; 
     [Header("Direction (choose)")]
     public bool useAngle = true;
-    public float fixedAngleDegrees = 0f; // 0 = right, 90 = up, 180 = left, -90 = down
-    public Vector2 fixedDirection = Vector2.right; // if useAngle == false
-
+    public float fixedAngleDegrees = 0f; 
+    public Vector2 fixedDirection = Vector2.right; 
     [Header("Spawn offset")]
     public Vector3 spawnOffset = Vector3.zero;
 
@@ -80,7 +77,7 @@ public class TankController : MonoBehaviour
         GameObject b = Instantiate(bulletPrefab, pos, rot);
         Rigidbody2D rb = b.GetComponent<Rigidbody2D>();
         TankBullet tb = b.GetComponent<TankBullet>();
-        if (tb != null) tb.hitMask = bulletHitMask; // make sure bullet uses the same mask
+        if (tb != null) tb.hitMask = bulletHitMask;
 
         if (rb != null)
         {

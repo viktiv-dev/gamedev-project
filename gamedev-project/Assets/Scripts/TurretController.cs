@@ -30,9 +30,9 @@ public class TurretController : MonoBehaviour
     public Color fireColor = Color.red;
     public float fireWidth = 0.08f;
     public float finalVisibleTime = 1f;
-    public float finalDelay = 0.2f; // small delay before final shot
-    public float minAngle = -90f; // lowest rotation angle in degrees
-    public float maxAngle = 90f;  // highest rotation angle in degrees
+    public float finalDelay = 0.2f;
+    public float minAngle = -90f; 
+    public float maxAngle = 90f; 
 
 
     public bool invertDirection = true;
@@ -64,12 +64,9 @@ public class TurretController : MonoBehaviour
 
         if (angleToPlayer <= detectionAngle / 2f && toPlayer.magnitude <= detectionRange)
         {
-            // Cast a ray toward the player to check line-of-sight
             RaycastHit2D hit = Physics2D.Raycast(gunPivot.position, toPlayer.normalized, detectionRange, obstacleMask | (1 << player.gameObject.layer));
-
             if (hit.collider != null && hit.collider.gameObject == player.gameObject)
             {
-                // Player is visible and detected
                 float targetAngle = Mathf.Atan2(toPlayer.y, toPlayer.x) * Mathf.Rad2Deg + angleOffset;
                 targetAngle = Mathf.Clamp(targetAngle, minAngle, maxAngle);
                 Quaternion targetRot = Quaternion.Euler(0f, 0f, targetAngle);
@@ -133,14 +130,11 @@ public class TurretController : MonoBehaviour
             yield return new WaitForSeconds(chargeTime);
         }
 
-        // --- Freeze turret rotation for final delay ---
         bool prevRotate = rotateContinuously;
         rotateContinuously = false;
 
-        // --- Small final delay ---
         yield return new WaitForSeconds(finalDelay);
 
-// --- Fire infinite laser ---
         Vector2 finalDir = GetMuzzleDirection();
         Vector3 finalStart = gunPivot.position;
         Vector3 finalEnd = finalStart + new Vector3(finalDir.x, finalDir.y, 0f) * lineRange;
@@ -150,14 +144,13 @@ public class TurretController : MonoBehaviour
         fireLine.SetPosition(0, finalStart);
         fireLine.SetPosition(1, finalEnd);
 
-// Check if player is hit anywhere along the line
+
         RaycastHit2D[] hits = Physics2D.RaycastAll(finalStart, finalDir, lineRange);
         foreach (var h in hits)
         {
             if (h.collider != null && h.collider.CompareTag("Player"))
             {
                 GameTimer.Instance.RemoveTime(timePenalty);
-                Debug.Log("Player hit by infinite laser! -" + timePenalty + "s");
                 break;
             }
         }

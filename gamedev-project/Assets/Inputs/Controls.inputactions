@@ -48,17 +48,6 @@
                 },
                 {
                     "name": "",
-                    "id": "3d092b71-df89-4685-968d-4d42a9e57d9a",
-                    "path": "<Mouse>/position",
-                    "interactions": "",
-                    "processors": "",
-                    "groups": "",
-                    "action": "Aim",
-                    "isComposite": false,
-                    "isPartOfComposite": false
-                },
-                {
-                    "name": "",
                     "id": "e09cb6d1-a14e-4a66-b04a-0ca2d4934914",
                     "path": "<Gamepad>/buttonSouth",
                     "interactions": "",
@@ -71,7 +60,7 @@
                 {
                     "name": "",
                     "id": "eb773303-e060-4b05-9bb7-5ffe9cdac130",
-                    "path": "<Gamepad>/buttonEast",
+                    "path": "<Gamepad>/buttonNorth",
                     "interactions": "",
                     "processors": "",
                     "groups": "",
