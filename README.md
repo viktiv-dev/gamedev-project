@@ -6,7 +6,7 @@ This game development course project is a platformer focused on fast paced movem
 ## Blog Posts
 * Roll-a-Ball – Covers the initial prototype based on Unity’s Roll-a-Ball tutorial and added modifications.
 * Game Design Document & Milestones – Outlines the core gameplay, mechanics, worldbuilding, and project goals.
-* [Development Update #1 – Progress on grappling hook mechanic.]{Blog Post #3 - Grappling Hook Update}
+* [Development Update #1 – Progress on grappling hook mechanic.]{Blog Post #3 - Grappling Hook Update.md}
 * Development Update #2 – Progress on enemies nad projectiles development.
 * Development Update #3 – Progress on level design and collectables.
 * Final Game & Conclusion – Showcases the finished game, reflecting on development and final improvements.
