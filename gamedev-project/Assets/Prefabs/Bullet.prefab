@@ -168,4 +168,4 @@ MonoBehaviour:
   hitMask:
     serializedVersion: 2
     m_Bits: 0
-  damage: 1
+  damage: 2

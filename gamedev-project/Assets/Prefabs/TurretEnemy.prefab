@@ -364,7 +364,7 @@ MonoBehaviour:
   angleOffset: 180
   useChargeWarning: 1
   rotateContinuously: 1
-  rotationSpeed: 30
+  rotationSpeed: 40
   warningPulses: 4
   warningColor: {r: 1, g: 0.48271224, b: 0, a: 0.25}
   warningWidth: 0.15
@@ -375,7 +375,7 @@ MonoBehaviour:
   minAngle: 180
   maxAngle: 360
   invertDirection: 1
-  timePenalty: 2
+  timePenalty: 4
   audioSource: {fileID: 0}
   laserSound: {fileID: 0}
   warningSound: {fileID: 0}

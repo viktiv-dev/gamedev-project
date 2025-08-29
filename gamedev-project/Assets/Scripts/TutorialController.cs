@@ -10,7 +10,8 @@ public class TutorialController : MonoBehaviour
     public TextMeshProUGUI instructionText;
     public AimArrow aimArrow;
     public AnchorHook anchorHook;
-    public GameObject anchorPoint;  
+    public GameObject anchorPoint;
+    public GameObject secondAnchorPoint;
     public Transform player;
     public BackgroundColorController bgColorController;
     [Header("Timings")]
@@ -38,6 +39,7 @@ public class TutorialController : MonoBehaviour
         aimArrow.enabled = false;
         anchorHook.enabled = false;
         anchorPoint.SetActive(false); 
+        secondAnchorPoint.SetActive(false);
         bgColorController.SetTutorial(true);
         StartCoroutine(RunTutorial());
     }
@@ -64,7 +66,7 @@ public class TutorialController : MonoBehaviour
         }
         yield return StartCoroutine(FadeOutText(instructionText, 0.5f));
         yield return new WaitForSeconds(timeAfterMoveDetected);
-        yield return StartCoroutine(FadeInText(instructionText, "Use your grappling hook to attach yourself to the anchor point. (RED BUTTON)", 0.5f));
+        yield return StartCoroutine(FadeInText(instructionText, "Use your grappling hook to attach yourself to the anchor point. (GREEN BUTTON)", 0.5f));
         anchorPoint.SetActive(true);
         yield return new WaitForSeconds(timeBeforeSpawnAnchor);
         anchorHook.enabled = true;
@@ -88,12 +90,13 @@ public class TutorialController : MonoBehaviour
         yield return new WaitForSeconds(2);
         yield return StartCoroutine(FadeOutText(instructionText, 0.5f));
         yield return new WaitForSeconds(1.5f);
-        yield return StartCoroutine(FadeInText(instructionText, "Now continue forward. Good luck", 0.5f));
+        yield return StartCoroutine(FadeInText(instructionText, "You can quit using the RED BUTTON. Now continue forward. Good luck", 0.5f));
         yield return new WaitForSeconds(2f);
         cameraControler.ZoomTo(15, 3);
         yield return StartCoroutine(FadeOutText(instructionText, 0.5f));
         anchorHook.gameObject.SetActive(true);
         aimArrow.gameObject.SetActive(true);
+        secondAnchorPoint.SetActive(true);
         tutorialRunning = false;
     }
 

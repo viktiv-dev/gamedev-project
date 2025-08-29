@@ -1,5 +1,6 @@
 using UnityEngine;
 using System;
+using UnityEngine.SceneManagement;
 
 public class GameTimer : MonoBehaviour
 {
@@ -10,6 +11,11 @@ public class GameTimer : MonoBehaviour
     public event Action OnTimeAdded;
     public event Action OnTimeRemoved;
     public event Action OnGameOver;
+    public bool paused = false;
+
+    public void Pause() { paused = true; }
+    public void Resume() { paused = false; }
+
 
     [Header("Audio")]
     public AudioSource audioSource;        
@@ -29,8 +35,8 @@ public class GameTimer : MonoBehaviour
 
     void Update()
     {
-        if (gameOverTriggered) return;
-
+        
+        if (gameOverTriggered || paused) return;
         if (timeLeft > 0f)
         {
             timeLeft -= Time.deltaTime;
@@ -90,6 +96,7 @@ public class GameTimer : MonoBehaviour
     private void TriggerGameOver()
     {
         gameOverTriggered = true;
+        SceneManager.LoadScene("LevelSelect");
         OnGameOver?.Invoke();
         Debug.Log("Game Over!");
     }
